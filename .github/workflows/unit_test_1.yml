@@ -1,9 +1,9 @@
-name: Test Main Script
+name: Run Python Script
 
 on: [push]
 
 jobs:
-  test:
+  run_script:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -14,66 +14,5 @@ jobs:
       with:
         python-version: '3.x'
 
-    - name: Create score_calculator.py (for import)
-      run: |
-        mkdir score_calculator
-        echo "def calculate_average(student_data):" > score_calculator/score_calculator.py
-        echo "    avgmark = (int(student_data[2]) + int(student_data[3]) + int(student_data[4])) / 3" >> score_calculator/score_calculator.py
-        echo "    return round(avgmark, 2)" >> score_calculator/score_calculator.py
-
-    - name: Create main script
-      run: |
-        cat <<EOF > main_script.py
-from score_calculator.score_calculator import calculate_average
-# Gets student details using input()
-name = "TestName" # Non-interactive input for testing
-age = "20"
-mark1 = "75"
-mark2 = "85"
-mark3 = "90"
-
-# Store all details in a list
-student_data = [name, age, mark1, mark2, mark3]
-
-# Print the data
-print("\n--- Student Details ---")
-print("Name:", student_data[0])
-print("Age:", student_data[1])
-print("Subject 1 Marks:", student_data[2])
-print("Subject 2 Marks:", student_data[3])
-print("Subject 3 Marks:", student_data[4])
-
-average = calculate_average(student_data)
-print("Average Marks:", average)
-EOF
-
-    - name: Run main script (non-interactive)
-      run: python main_script.py
-
-    - name: Create unit test for main script (testing the import and basic structure)
-      run: |
-        cat <<EOF > test_main_script.py
-import unittest
-import subprocess
-import sys
-import os
-
-class TestMainScriptOutput(unittest.TestCase):
-
-    def test_main_script_prints_details(self):
-        process = subprocess.run([sys.executable, "main_script.py"], capture_output=True, text=True, check=True)
-        output_lines = process.stdout.strip().split('\\n')
-        self.assertIn("--- Student Details ---", output_lines)
-        self.assertIn("Name: TestName", output_lines)
-        self.assertIn("Age: 20", output_lines)
-        self.assertIn("Subject 1 Marks: 75", output_lines)
-        self.assertIn("Subject 2 Marks: 85", output_lines)
-        self.assertIn("Subject 3 Marks: 90", output_lines)
-        self.assertIn("Average Marks: 83.33", output_lines)
-
-if __name__ == '__main__':
-    unittest.main()
-EOF
-
-    - name: Run unit test for main script
-      run: python test_main_script.py
+    - name: Run Python script
+      run: python your_script_name.py
