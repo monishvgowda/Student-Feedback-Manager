@@ -1,0 +1,90 @@
+name: Test Python Modules
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Create modules
+      run: |
+        mkdir src
+        cat <<EOF > src/main_script.py
+from score_calculator import calculate_average
+
+# Gets student details using input()
+name = input("Enter student name: ")
+age = input("Enter student age: ")
+mark1 = input("Enter marks for Subject 1: ")
+mark2 = input("Enter marks for Subject 2: ")
+mark3 = input("Enter marks for Subject 3: ")
+
+# Store all details in a list
+student_data = [name, age, mark1, mark2, mark3]
+
+# Print the data
+print("\n--- Student Details ---")
+print("Name:", student_data[0])
+print("Age:", student_data[1])
+print("Subject 1 Marks:", student_data[2])
+print("Subject 2 Marks:", student_data[3])
+print("Subject 3 Marks:", student_data[4])
+EOF
+
+        mkdir src/score_calculator
+        cat <<EOF > src/score_calculator/__init__.py
+EOF
+
+        cat <<EOF > src/score_calculator/calculator.py
+def calculate_average(student_data):
+    avgmark = (int(student_data[2]) + int(student_data[3]) + int(student_data[4])) / 3
+    return round(avgmark, 2)
+EOF
+
+    - name: Install dependencies (if any)
+      run: |
+        python -m pip install --upgrade pip
+        # Add any dependencies your code might have here
+        # pip install -r requirements.txt
+
+    - name: Run basic test of main script (non-interactive)
+      run: |
+        echo "from src.score_calculator.calculator import calculate_average" > test_main.py
+        echo "student_data = ['Test', '18', '90', '85', '95']" >> test_main.py
+        echo "average = calculate_average(student_data)" >> test_main.py
+        echo "print(f'Average: {average}')" >> test_main.py
+        python test_main.py
+
+    - name: Run unit tests for calculator module
+      run: |
+        python -m unittest discover -s src -p "test_*.py"
+
+    - name: Create unit test file
+      run: |
+        cat <<EOF > src/test_calculator.py
+import unittest
+from src.score_calculator.calculator import calculate_average
+
+class TestCalculator(unittest.TestCase):
+
+    def test_calculate_average_valid_scores(self):
+        student_data = ["Alice", "20", "80", "90", "75"]
+        average = calculate_average(student_data)
+        self.assertEqual(average, 81.67)
+
+    def test_calculate_average_zero_scores(self):
+        student_data = ["Bob", "22", "0", "0", "0"]
+        average = calculate_average(student_data)
+        self.assertEqual(average, 0.00)
+
+if __name__ == '__main__':
+    unittest.main()
+EOF
