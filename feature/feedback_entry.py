@@ -1,4 +1,4 @@
-
+from score_calculator.py import calculate_average
 # Gets student details using input()
 name = input("Enter student name: ")
 age = input("Enter student age: ")
